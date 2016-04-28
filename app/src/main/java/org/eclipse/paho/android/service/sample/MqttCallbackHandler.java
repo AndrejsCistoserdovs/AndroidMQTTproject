@@ -39,6 +39,11 @@ import message.publisher.MessagePublisher;
  */
 public class MqttCallbackHandler implements MqttCallback {
 
+
+
+
+
+
     // declaring global variables for objects
     OutputStreamWriter osw; // OutputStreamWriter sends out a stream of data
     File file;
@@ -51,6 +56,17 @@ public class MqttCallbackHandler implements MqttCallback {
   private Context context;
   /** Client handle to reference the connection that this handler is attached to**/
   private String clientHandle;
+
+    /**
+     * Creates an <code>MqttCallbackHandler</code> object
+     * @param context The application's context
+     * @param clientHandle The handle to a {@link Connection} object
+     */
+    public MqttCallbackHandler(Context context, String clientHandle)
+    {
+        this.context = context;
+        this.clientHandle = clientHandle;
+    }
 
 
     // This method creates a text file in the external phone's memory and sets up FileOutputStream and OutputStreamWriter
@@ -92,17 +108,6 @@ public void createFile(){
 
 
 
-
-    /**
-   * Creates an <code>MqttCallbackHandler</code> object
-   * @param context The application's context
-   * @param clientHandle The handle to a {@link Connection} object
-   */
-  public MqttCallbackHandler(Context context, String clientHandle)
-  {
-    this.context = context;
-    this.clientHandle = clientHandle;
-  }
 
   /**
    * @see org.eclipse.paho.client.mqttv3.MqttCallback#connectionLost(java.lang.Throwable)
@@ -156,18 +161,21 @@ public void createFile(){
    else {
        this.createFile();
        status=true;     // true implies that the file has been created
+       // registering the listener with a phone
+
+       try {
+           MyListener   = new MyPhoneStateListener();
+           TelephonManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+           TelephonManager.listen(MyListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+       }
+       catch (Exception ex) {
+
+           ex.printStackTrace();
+
+       }
+
    }
-        // registering the listener with a phone
-      try {
-          MyListener   = new MyPhoneStateListener();
-          TelephonManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-          TelephonManager.listen(MyListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-      }
-      catch (Exception ex) {
 
-          ex.printStackTrace();
-
-      }
       System.out.println(counter);
       counter=counter+1;    // message counter
 
